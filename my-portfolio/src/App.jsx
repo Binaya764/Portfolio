@@ -1,122 +1,122 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useState, useEffect, useRef } from 'react';
+import { fileSystem } from './data/filesystem'; // Make sure this file exists
+import './styles/index.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [input, setInput] = useState('');
+  const [history, setHistory] = useState([
+    { command: '', output: 'Welcome to Terminal Portfolio. Type "help" to begin.' }
+  ]);
+  
+  // For navigating previous commands with Up/Down arrows
+  const [cmdHistory, setCmdHistory] = useState([]);
+  const [pointer, setPointer] = useState(-1);
+
+  const inputRef = useRef(null);
+  const bottomRef = useRef(null);
+
+  // 1. Auto-scroll to bottom whenever history updates
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [history]);
+
+  // 2. Keep focus on input
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const handleCommand = (e) => {
+    // Handle Command History (Up Arrow)
+    if (e.key === 'ArrowUp') {
+      if (pointer < cmdHistory.length - 1) {
+        const newPointer = pointer + 1;
+        setPointer(newPointer);
+        setInput(cmdHistory[cmdHistory.length - 1 - newPointer]);
+      }
+    }
+
+    // Handle Command History (Down Arrow)
+    if (e.key === 'ArrowDown') {
+      if (pointer > 0) {
+        const newPointer = pointer - 1;
+        setPointer(newPointer);
+        setInput(cmdHistory[cmdHistory.length - 1 - newPointer]);
+      } else {
+        setPointer(-1);
+        setInput('');
+      }
+    }
+
+    // Handle Execution
+    if (e.key === 'Enter') {
+      const cleanInput = input.toLowerCase().trim();
+      if (!cleanInput) return;
+
+      let response = '';
+
+      switch (cleanInput) {
+        case 'help':
+          response = 'Available commands: about, skills, projects, clear, github';
+          break;
+        case 'about':
+          response = fileSystem["about.txt"];
+          break;
+        case 'skills':
+          response = fileSystem["skills.txt"];
+          break;
+        case 'projects':
+          response = "Projects found: " + Object.keys(fileSystem.projects).join(', ');
+          break;
+        case 'github':
+          response = "Opening GitHub...";
+          window.open("https://github.com/Binaya764", "_blank");
+          break;
+        case 'clear':
+          setHistory([]);
+          setInput('');
+          setPointer(-1);
+          return;
+        default:
+          response = `bash: command not found: ${cleanInput}`;
+      }
+
+      setHistory(prev => [...prev, { command: input, output: response }]);
+      setCmdHistory(prev => [...prev, input]);
+      setInput('');
+      setPointer(-1);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="terminal-container" onClick={() => inputRef.current.focus()}>
+      <div className="history">
+        {history.map((entry, index) => (
+          <div key={index} className="history-item">
+            {entry.command && (
+              <div className="prompt-line">
+                <span className="user">guest@portfolio</span>:<span className="path">~</span>$ {entry.command}
+              </div>
+            )}
+            <div className="output">{entry.output}</div>
+          </div>
+        ))}
+        {/* Dummy div to anchor the scroll */}
+        <div ref={bottomRef} />
+      </div>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <div className="input-line">
+        <span className="user">guest@portfolio</span>:<span className="path">~</span>$ 
+        <input 
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleCommand}
+          spellCheck="false"
+          autoComplete="off"
+        />
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;

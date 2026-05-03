@@ -1,0 +1,65 @@
+/* src/styles/index.css */
+:root {
+  --bg-color: #0d0d0d;
+  --text-color: #33ff33; /* Classic Matrix Green */
+  --font-family: 'Fira Code', 'Courier New', monospace;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  margin: 0;
+  overflow: hidden; /* Keeps it feeling like a single app window */
+}
+
+.terminal-container {
+  padding: 20px;
+  height: 100vh;
+  box-sizing: border-box;
+  overflow-y: auto;
+  position: relative;
+  text-shadow: 0 0 5px rgba(51, 255, 51, 0.7);
+}
+
+/* Scanline Overlay Effect */
+.terminal-container::before {
+  content: " ";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.25) 50%
+  ),
+  linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.06),
+    rgba(0, 255, 0, 0.02),
+    rgba(0, 0, 255, 0.06)
+  );
+  background-size: 100% 4px, 3px 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.user { color: #ff55ff; } /* Pink/Purple for user */
+.path { color: #55ffff; } /* Cyan for path */
+
+.input-line {
+  display: flex;
+  gap: 10px;
+}
+
+input {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  font-family: var(--font-family);
+  font-size: 1rem;
+  outline: none;
+  width: 100%;
+  text-shadow: 0 0 5px rgba(51, 255, 51, 0.7);
+}
